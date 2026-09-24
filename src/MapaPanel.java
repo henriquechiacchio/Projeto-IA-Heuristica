@@ -8,6 +8,10 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class MapaPanel extends JPanel {
     private static final int MARGEM_X = 70;
@@ -16,7 +20,10 @@ public class MapaPanel extends JPanel {
     private static final int RAIO_PONTO = 10;
 
     private final Grafo grafo;
-    private No pontoSelecionado;
+    private No origem;
+    private No destino;
+    private List<No> caminho = Collections.emptyList();
+    private Consumer<No> cliqueListener;
 
     public MapaPanel(Grafo grafo) {
         this.grafo = grafo;
@@ -32,7 +39,28 @@ public class MapaPanel extends JPanel {
         });
     }
 
+    public void setCliqueListener(Consumer<No> cliqueListener) {
+        this.cliqueListener = cliqueListener;
+    }
+
+    public void setOrigem(No origem) {
+        this.origem = origem;
+        repaint();
+    }
+
+    public void setDestino(No destino) {
+        this.destino = destino;
+        repaint();
+    }
+
+    public void setCaminho(List<No> caminho) {
+        this.caminho = caminho == null ? Collections.emptyList() : new ArrayList<>(caminho);
+        repaint();
+    }
+
     private void selecionarPonto(int mouseX, int mouseY) {
+        No pontoClicado = null;
+
         for (No no : grafo.getNos()) {
             int x = telaX(no);
             int y = telaY(no);
@@ -40,11 +68,13 @@ public class MapaPanel extends JPanel {
             double distancia = Math.hypot(mouseX - x, mouseY - y);
 
             if (distancia <= RAIO_PONTO + 10) {
-                pontoSelecionado = no;
-                System.out.println("Ponto selecionado: " + no.getNome());
-                repaint();
-                return;
+                pontoClicado = no;
+                break;
             }
+        }
+
+        if (pontoClicado != null && cliqueListener != null) {
+            cliqueListener.accept(pontoClicado);
         }
     }
 
@@ -70,6 +100,7 @@ public class MapaPanel extends JPanel {
 
         desenharGrade(g);
         desenharArestas(g);
+        desenharCaminho(g);
         desenharNos(g);
 
         g.dispose();
@@ -140,6 +171,21 @@ public class MapaPanel extends JPanel {
         g.setColor(new Color(220, 30, 30));
     }
 
+    private void desenharCaminho(Graphics2D g) {
+        if (caminho == null || caminho.size() < 2) {
+            return;
+        }
+
+        g.setColor(new Color(46, 204, 113));
+        g.setStroke(new BasicStroke(7));
+
+        for (int indice = 0; indice < caminho.size() - 1; indice++) {
+            No atual = caminho.get(indice);
+            No proximo = caminho.get(indice + 1);
+            g.drawLine(telaX(atual), telaY(atual), telaX(proximo), telaY(proximo));
+        }
+    }
+
     private void desenharNos(Graphics2D g) {
         g.setFont(new Font("Arial", Font.BOLD, 20));
 
@@ -147,24 +193,24 @@ public class MapaPanel extends JPanel {
             int x = telaX(no);
             int y = telaY(no);
 
-            if (no == pontoSelecionado) {
-                g.setColor(new Color(255, 190, 0));
-                g.fillOval(
-                        x - RAIO_PONTO - 5,
-                        y - RAIO_PONTO - 5,
-                        (RAIO_PONTO + 5) * 2,
-                        (RAIO_PONTO + 5) * 2
-                );
+            if (no == origem) {
+                g.setColor(new Color(34, 197, 94));
+                g.fillOval(x - RAIO_PONTO - 5, y - RAIO_PONTO - 5, (RAIO_PONTO + 5) * 2, (RAIO_PONTO + 5) * 2);
+                g.setColor(Color.BLACK);
+                g.drawString("O", x + 12, y - 12);
+                continue;
+            }
+
+            if (no == destino) {
+                g.setColor(new Color(239, 68, 68));
+                g.fillOval(x - RAIO_PONTO - 5, y - RAIO_PONTO - 5, (RAIO_PONTO + 5) * 2, (RAIO_PONTO + 5) * 2);
+                g.setColor(Color.BLACK);
+                g.drawString("D", x + 12, y - 12);
+                continue;
             }
 
             g.setColor(new Color(40, 70, 180));
-            g.fillOval(
-                    x - RAIO_PONTO,
-                    y - RAIO_PONTO,
-                    RAIO_PONTO * 2,
-                    RAIO_PONTO * 2
-            );
-
+            g.fillOval(x - RAIO_PONTO, y - RAIO_PONTO, RAIO_PONTO * 2, RAIO_PONTO * 2);
             g.setColor(Color.BLACK);
             g.drawString(no.getNome(), x + 12, y - 12);
         }

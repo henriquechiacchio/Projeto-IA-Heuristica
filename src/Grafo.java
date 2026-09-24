@@ -96,13 +96,13 @@ public class Grafo {
         adicionarAresta("N", "M", 2);
 
         // J -> R
-        adicionarAresta("J", "R", 3);
+        adicionarAresta("J", "R", 2);
 
         // K <-> S
-        adicionarBidirecional("K", "S", 3);
+        adicionarBidirecional("K", "S", 2);
 
         // F <-> Q
-        adicionarBidirecional("F", "Q", 4);
+        adicionarBidirecional("F", "Q", 3);
 
         // Q -> R
         adicionarAresta("Q", "R", 1);

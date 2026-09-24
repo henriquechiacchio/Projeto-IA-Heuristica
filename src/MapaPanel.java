@@ -22,7 +22,7 @@ public class MapaPanel extends JPanel {
         this.grafo = grafo;
 
         setBackground(Color.WHITE);
-        setPreferredSize(new Dimension(680, 620));
+        setPreferredSize(new Dimension(680, 550));
 
         addMouseListener(new MouseAdapter() {
             @Override
@@ -53,7 +53,8 @@ public class MapaPanel extends JPanel {
     }
 
     private int telaY(No no) {
-        return MARGEM_Y + no.getY() * TAMANHO_CELULA;
+        int deslocamentoLinhaInferior = no.getY() == 6 ? TAMANHO_CELULA : 0;
+        return MARGEM_Y + no.getY() * TAMANHO_CELULA - deslocamentoLinhaInferior;
     }
 
     @Override
@@ -80,10 +81,10 @@ public class MapaPanel extends JPanel {
 
         for (int x = 0; x <= 7; x++) {
             int posX = MARGEM_X + x * TAMANHO_CELULA;
-            g.drawLine(posX, MARGEM_Y, posX, MARGEM_Y + 6 * TAMANHO_CELULA);
+            g.drawLine(posX, MARGEM_Y, posX, MARGEM_Y + 5 * TAMANHO_CELULA);
         }
 
-        for (int y = 0; y <= 6; y++) {
+        for (int y = 0; y <= 5; y++) {
             int posY = MARGEM_Y + y * TAMANHO_CELULA;
             g.drawLine(MARGEM_X, posY, MARGEM_X + 7 * TAMANHO_CELULA, posY);
         }
